@@ -8327,7 +8327,7 @@ pub fn ReplicaType(
             assert(self.journal.header_with_op(self.op) != null);
             assert(!self.primary_abdicating);
             assert(self.view_headers.command == .start_view);
-            assert(self.log_view >= self.superblock.working.vsr_state.checkpoint.header.view);
+            assert(self.log_view >= self.superblock.working.vsr_state.sync_view);
 
             self.status = .normal;
 
