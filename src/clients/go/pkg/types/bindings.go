@@ -16,6 +16,7 @@ type AccountFlags struct {
 	DebitsMustNotExceedCredits bool
 	CreditsMustNotExceedDebits bool
 	History                    bool
+	Imported                   bool
 }
 
 func (f AccountFlags) ToUint16() uint16 {
@@ -37,6 +38,10 @@ func (f AccountFlags) ToUint16() uint16 {
 		ret |= (1 << 3)
 	}
 
+	if f.Imported {
+		ret |= (1 << 4)
+	}
+
 	return ret
 }
 
@@ -47,6 +52,7 @@ type TransferFlags struct {
 	VoidPendingTransfer bool
 	BalancingDebit      bool
 	BalancingCredit     bool
+	Imported            bool
 }
 
 func (f TransferFlags) ToUint16() uint16 {
@@ -74,6 +80,10 @@ func (f TransferFlags) ToUint16() uint16 {
 
 	if f.BalancingCredit {
 		ret |= (1 << 5)
+	}
+
+	if f.Imported {
+		ret |= (1 << 6)
 	}
 
 	return ret
@@ -139,6 +149,7 @@ func (o Account) AccountFlags() AccountFlags {
 	f.DebitsMustNotExceedCredits = ((o.Flags >> 1) & 0x1) == 1
 	f.CreditsMustNotExceedDebits = ((o.Flags >> 2) & 0x1) == 1
 	f.History = ((o.Flags >> 3) & 0x1) == 1
+	f.Imported = ((o.Flags >> 4) & 0x1) == 1
 	return f
 }
 
@@ -166,34 +177,41 @@ func (o Transfer) TransferFlags() TransferFlags {
 	f.VoidPendingTransfer = ((o.Flags >> 3) & 0x1) == 1
 	f.BalancingDebit = ((o.Flags >> 4) & 0x1) == 1
 	f.BalancingCredit = ((o.Flags >> 5) & 0x1) == 1
+	f.Imported = ((o.Flags >> 6) & 0x1) == 1
 	return f
 }
 
 type CreateAccountResult uint32
 
 const (
-	AccountOK                             CreateAccountResult = 0
-	AccountLinkedEventFailed              CreateAccountResult = 1
-	AccountLinkedEventChainOpen           CreateAccountResult = 2
-	AccountTimestampMustBeZero            CreateAccountResult = 3
-	AccountReservedField                  CreateAccountResult = 4
-	AccountReservedFlag                   CreateAccountResult = 5
-	AccountIDMustNotBeZero                CreateAccountResult = 6
-	AccountIDMustNotBeIntMax              CreateAccountResult = 7
-	AccountFlagsAreMutuallyExclusive      CreateAccountResult = 8
-	AccountDebitsPendingMustBeZero        CreateAccountResult = 9
-	AccountDebitsPostedMustBeZero         CreateAccountResult = 10
-	AccountCreditsPendingMustBeZero       CreateAccountResult = 11
-	AccountCreditsPostedMustBeZero        CreateAccountResult = 12
-	AccountLedgerMustNotBeZero            CreateAccountResult = 13
-	AccountCodeMustNotBeZero              CreateAccountResult = 14
-	AccountExistsWithDifferentFlags       CreateAccountResult = 15
-	AccountExistsWithDifferentUserData128 CreateAccountResult = 16
-	AccountExistsWithDifferentUserData64  CreateAccountResult = 17
-	AccountExistsWithDifferentUserData32  CreateAccountResult = 18
-	AccountExistsWithDifferentLedger      CreateAccountResult = 19
-	AccountExistsWithDifferentCode        CreateAccountResult = 20
-	AccountExists                         CreateAccountResult = 21
+	AccountOK                                   CreateAccountResult = 0
+	AccountLinkedEventFailed                    CreateAccountResult = 1
+	AccountLinkedEventChainOpen                 CreateAccountResult = 2
+	AccountImportedEventExpected                CreateAccountResult = 22
+	AccountImportedEventNotExpected             CreateAccountResult = 23
+	AccountImportedEventMustBeLinked            CreateAccountResult = 24
+	AccountTimestampMustBeZero                  CreateAccountResult = 3
+	AccountImportedEventTimestampMustNotBeZero  CreateAccountResult = 25
+	AccountImportedEventTimestampMustNotAdvance CreateAccountResult = 26
+	AccountReservedField                        CreateAccountResult = 4
+	AccountReservedFlag                         CreateAccountResult = 5
+	AccountIDMustNotBeZero                      CreateAccountResult = 6
+	AccountIDMustNotBeIntMax                    CreateAccountResult = 7
+	AccountFlagsAreMutuallyExclusive            CreateAccountResult = 8
+	AccountDebitsPendingMustBeZero              CreateAccountResult = 9
+	AccountDebitsPostedMustBeZero               CreateAccountResult = 10
+	AccountCreditsPendingMustBeZero             CreateAccountResult = 11
+	AccountCreditsPostedMustBeZero              CreateAccountResult = 12
+	AccountLedgerMustNotBeZero                  CreateAccountResult = 13
+	AccountCodeMustNotBeZero                    CreateAccountResult = 14
+	AccountExistsWithDifferentFlags             CreateAccountResult = 15
+	AccountExistsWithDifferentUserData128       CreateAccountResult = 16
+	AccountExistsWithDifferentUserData64        CreateAccountResult = 17
+	AccountExistsWithDifferentUserData32        CreateAccountResult = 18
+	AccountExistsWithDifferentLedger            CreateAccountResult = 19
+	AccountExistsWithDifferentCode              CreateAccountResult = 20
+	AccountExists                               CreateAccountResult = 21
+	AccountImportedEventTimestampMustNotRegress CreateAccountResult = 27
 )
 
 func (i CreateAccountResult) String() string {
@@ -204,8 +222,18 @@ func (i CreateAccountResult) String() string {
 		return "AccountLinkedEventFailed"
 	case AccountLinkedEventChainOpen:
 		return "AccountLinkedEventChainOpen"
+	case AccountImportedEventExpected:
+		return "AccountImportedEventExpected"
+	case AccountImportedEventNotExpected:
+		return "AccountImportedEventNotExpected"
+	case AccountImportedEventMustBeLinked:
+		return "AccountImportedEventMustBeLinked"
 	case AccountTimestampMustBeZero:
 		return "AccountTimestampMustBeZero"
+	case AccountImportedEventTimestampMustNotBeZero:
+		return "AccountImportedEventTimestampMustNotBeZero"
+	case AccountImportedEventTimestampMustNotAdvance:
+		return "AccountImportedEventTimestampMustNotAdvance"
 	case AccountReservedField:
 		return "AccountReservedField"
 	case AccountReservedFlag:
@@ -242,6 +270,8 @@ func (i CreateAccountResult) String() string {
 		return "AccountExistsWithDifferentCode"
 	case AccountExists:
 		return "AccountExists"
+	case AccountImportedEventTimestampMustNotRegress:
+		return "AccountImportedEventTimestampMustNotRegress"
 	}
 	return "CreateAccountResult(" + strconv.FormatInt(int64(i+1), 10) + ")"
 }
@@ -305,6 +335,15 @@ const (
 	TransferOverflowsTimeout                           CreateTransferResult = 53
 	TransferExceedsCredits                             CreateTransferResult = 54
 	TransferExceedsDebits                              CreateTransferResult = 55
+	TransferImportedEventExpected                      CreateTransferResult = 56
+	TransferImportedEventNotExpected                   CreateTransferResult = 57
+	TransferImportedEventMustBeLinked                  CreateTransferResult = 58
+	TransferImportedEventTimestampMustNotBeZero        CreateTransferResult = 59
+	TransferImportedEventTimestampMustNotAdvance       CreateTransferResult = 60
+	TransferImportedEventDebitAccountMustNotAdvance    CreateTransferResult = 61
+	TransferImportedEventCreditAccountMustNotAdvance   CreateTransferResult = 62
+	TransferImportedEventTimestampMustNotRegress       CreateTransferResult = 63
+	TransferImportedEventTimeoutMustBeZero             CreateTransferResult = 64
 )
 
 func (i CreateTransferResult) String() string {
@@ -421,6 +460,24 @@ func (i CreateTransferResult) String() string {
 		return "TransferExceedsCredits"
 	case TransferExceedsDebits:
 		return "TransferExceedsDebits"
+	case TransferImportedEventExpected:
+		return "TransferImportedEventExpected"
+	case TransferImportedEventNotExpected:
+		return "TransferImportedEventNotExpected"
+	case TransferImportedEventMustBeLinked:
+		return "TransferImportedEventMustBeLinked"
+	case TransferImportedEventTimestampMustNotBeZero:
+		return "TransferImportedEventTimestampMustNotBeZero"
+	case TransferImportedEventTimestampMustNotAdvance:
+		return "TransferImportedEventTimestampMustNotAdvance"
+	case TransferImportedEventDebitAccountMustNotAdvance:
+		return "TransferImportedEventDebitAccountMustNotAdvance"
+	case TransferImportedEventCreditAccountMustNotAdvance:
+		return "TransferImportedEventCreditAccountMustNotAdvance"
+	case TransferImportedEventTimestampMustNotRegress:
+		return "TransferImportedEventTimestampMustNotRegress"
+	case TransferImportedEventTimeoutMustBeZero:
+		return "TransferImportedEventTimeoutMustBeZero"
 	}
 	return "CreateTransferResult(" + strconv.FormatInt(int64(i+1), 10) + ")"
 }
