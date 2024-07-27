@@ -23,9 +23,34 @@ public enum CreateTransferResult {
     LinkedEventChainOpen((int) 2),
 
     /**
+     * @see <a href="https://docs.tigerbeetle.com/reference/requests/create_transfers#imported_event_expected">imported_event_expected</a>
+     */
+    ImportedEventExpected((int) 56),
+
+    /**
+     * @see <a href="https://docs.tigerbeetle.com/reference/requests/create_transfers#imported_event_not_expected">imported_event_not_expected</a>
+     */
+    ImportedEventNotExpected((int) 57),
+
+    /**
+     * @see <a href="https://docs.tigerbeetle.com/reference/requests/create_transfers#imported_event_must_be_linked">imported_event_must_be_linked</a>
+     */
+    ImportedEventMustBeLinked((int) 58),
+
+    /**
      * @see <a href="https://docs.tigerbeetle.com/reference/requests/create_transfers#timestamp_must_be_zero">timestamp_must_be_zero</a>
      */
     TimestampMustBeZero((int) 3),
+
+    /**
+     * @see <a href="https://docs.tigerbeetle.com/reference/requests/create_transfers#imported_event_timestamp_must_not_be_zero">imported_event_timestamp_must_not_be_zero</a>
+     */
+    ImportedEventTimestampMustNotBeZero((int) 59),
+
+    /**
+     * @see <a href="https://docs.tigerbeetle.com/reference/requests/create_transfers#imported_event_timestamp_must_not_advance">imported_event_timestamp_must_not_advance</a>
+     */
+    ImportedEventTimestampMustNotAdvance((int) 60),
 
     /**
      * @see <a href="https://docs.tigerbeetle.com/reference/requests/create_transfers#reserved_flag">reserved_flag</a>
@@ -121,6 +146,16 @@ public enum CreateTransferResult {
      * @see <a href="https://docs.tigerbeetle.com/reference/requests/create_transfers#credit_account_not_found">credit_account_not_found</a>
      */
     CreditAccountNotFound((int) 22),
+
+    /**
+     * @see <a href="https://docs.tigerbeetle.com/reference/requests/create_transfers#imported_event_debit_account_must_not_advance">imported_event_debit_account_must_not_advance</a>
+     */
+    ImportedEventDebitAccountMustNotAdvance((int) 61),
+
+    /**
+     * @see <a href="https://docs.tigerbeetle.com/reference/requests/create_transfers#imported_event_credit_account_must_not_advance">imported_event_credit_account_must_not_advance</a>
+     */
+    ImportedEventCreditAccountMustNotAdvance((int) 62),
 
     /**
      * @see <a href="https://docs.tigerbeetle.com/reference/requests/create_transfers#accounts_must_have_the_same_ledger">accounts_must_have_the_same_ledger</a>
@@ -241,6 +276,16 @@ public enum CreateTransferResult {
      * @see <a href="https://docs.tigerbeetle.com/reference/requests/create_transfers#exists">exists</a>
      */
     Exists((int) 46),
+
+    /**
+     * @see <a href="https://docs.tigerbeetle.com/reference/requests/create_transfers#imported_event_timestamp_must_not_regress">imported_event_timestamp_must_not_regress</a>
+     */
+    ImportedEventTimestampMustNotRegress((int) 63),
+
+    /**
+     * @see <a href="https://docs.tigerbeetle.com/reference/requests/create_transfers#imported_event_timeout_must_be_zero">imported_event_timeout_must_be_zero</a>
+     */
+    ImportedEventTimeoutMustBeZero((int) 64),
 
     /**
      * @see <a href="https://docs.tigerbeetle.com/reference/requests/create_transfers#overflows_debits_pending">overflows_debits_pending</a>
